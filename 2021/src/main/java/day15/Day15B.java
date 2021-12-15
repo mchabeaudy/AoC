@@ -9,117 +9,134 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Day15B {
 
-  static Map<Coordinate, Point> pointsMap = new HashMap<>();
+  static Point[][] points;
+  static int xMax;
+  static int yMax;
 
   public static void main(String[] args) {
-    try (var linesStream = Files.lines(
-        Paths.get(getSystemResource("day15.txt").getPath()))) {
-      var lines0 = linesStream.toList();
+      try (var linesStream = Files.lines(
+          Paths.get(getSystemResource("day15.txt").getPath().substring(1)))) {
+        var lines0 = linesStream.toList();
 
-      var newLines0 = lines0.stream()
-          .map(line -> Arrays.stream(line.split(""))
-              .map(s -> new Digit(parseInt(s)))
-              .toList())
-          .map(digits -> range(0, 5)
-              .mapToObj(i -> digits.stream().map(d -> d.next(i).stringValue())
-                  .collect(Collectors.joining()))
-              .collect(Collectors.joining()))
-          .toList();
+        var newLines0 = lines0.stream()
+            .map(line -> Arrays.stream(line.split(""))
+                .map(s -> new Digit(parseInt(s)))
+                .toList())
+            .map(digits -> range(0, 5)
+                .mapToObj(i -> digits.stream().map(d -> d.next(i).stringValue())
+                    .collect(Collectors.joining()))
+                .collect(Collectors.joining()))
+            .toList();
 
-      var lines = range(0, 5).mapToObj(i -> newLines0.stream()
-              .map(line -> Arrays.stream(line.split(""))
-                  .map(s -> new Digit(parseInt(s)).next(i).stringValue())
-                  .collect(Collectors.joining()))
-              .toList())
-          .flatMap(Collection::stream)
-          .toList();
+        var lines = range(0, 5).mapToObj(i -> newLines0.stream()
+                .map(line -> Arrays.stream(line.split(""))
+                    .map(s -> new Digit(parseInt(s)).next(i).stringValue())
+                    .collect(Collectors.joining()))
+                .toList())
+            .flatMap(Collection::stream)
+            .toList();
 
-      int lineLength = lines.get(0).length();
-      int linesHeight = lines.size();
-      range(0, linesHeight).forEach(y -> range(0, lineLength)
-          .forEach(x -> pointsMap.put(new Coordinate(x, y),
-              new Point(x, y, charToInt(lines.get(y).charAt(x))))
-          ));
-      var lastPoint = getPoint(lineLength - 1, linesHeight - 1);
+        int lineLength = lines.get(0).length();
+        xMax = lineLength - 1;
+        int linesHeight = lines.size();
+        yMax = linesHeight - 1;
+        points = new Point[lineLength][linesHeight];
+        range(0, linesHeight).forEach(y -> range(0, lineLength)
+            .forEach(x -> points[x][y] = new Point(x, y, charToInt(lines.get(y).charAt(x)))));
+        var lastPoint = points[lineLength - 1][linesHeight - 1];
 
-      Map<Coordinate,Path> paths = new HashMap<>();
-      var p0 = new Path();
-      p0.addPoint(getPoint(0, 0));
-      paths.put(p0.getLast().coord, p0);
+        Path[][] pathsMap = new Path[lineLength][linesHeight];
+        Integer[][] riskMap = new Integer[lineLength][linesHeight];
 
-      var process = true;
-      while (process) {
-        Map<Coordinate, Path> m = new HashMap<>(paths);
-        paths.values().stream().filter(path -> !path.getLast().equals(lastPoint))
-            .forEach(path -> {
-              var nearPoints = nearPoints(path.getLast());
-              nearPoints.removeIf(path::contains);
-              List<Path> nPaths = nearPoints.stream()
-                  .map(p -> new Path(path, p))
-                  .toList();
-              nPaths.forEach(nPath -> {
-                if (m.containsKey(nPath.getLast().coord)) {
-                  var ePath = m.get(nPath.getLast().coord);
-                  if (ePath.risk > nPath.risk) {
-                    m.put(nPath.getLast().coord, nPath);
+        var p0 = new Path();
+        p0.addPoint(points[0][0]);
+        pathsMap[0][0] = p0;
+        riskMap[0][0] = 0;
+
+        var process = true;
+        while (process) {
+          Path[][] nPathsMap = new Path[lineLength][linesHeight];
+          range(0, lineLength).forEach(
+              x -> range(0, linesHeight).forEach(y -> nPathsMap[x][y] = pathsMap[x][y]));
+          Integer[][] nRiskMap = new Integer[lineLength][linesHeight];
+          range(0, lineLength).forEach(
+              x -> range(0, linesHeight).forEach(y -> nRiskMap[x][y] = riskMap[x][y]));
+          Arrays.stream(pathsMap).map(Arrays::stream)
+              .flatMap(Function.identity())
+              .filter(path -> Objects.nonNull(path) && !path.last.equals(lastPoint))
+              .forEach(path -> {
+                var nearPoints = nearPoints(path.last);
+                nearPoints.removeIf(path::contains);
+                nearPoints.forEach(p -> {
+                  if (nPathsMap[p.coord.x][p.coord.y] == null) {
+                    nPathsMap[p.coord.x][p.coord.y] = new Path(path, p);
+                    nRiskMap[p.coord.x][p.coord.y] = nPathsMap[p.coord.x][p.coord.y].risk;
+                  } else {
+                    if (nRiskMap[p.coord.x][p.coord.y] > path.risk + p.risk) {
+                      nPathsMap[p.coord.x][p.coord.y] = new Path(path, p);
+                      nRiskMap[p.coord.x][p.coord.y] = nPathsMap[p.coord.x][p.coord.y].risk;
+                    }
                   }
-                } else {
-                  m.put(nPath.getLast().coord, nPath);
-                }
+                });
               });
-            });
-        var newPaths = m.values();
-        if (newPaths.stream().mapToInt(Path::getRisk).sum() ==
-            paths.values().stream().mapToInt(Path::getRisk).sum()) {
-          process = false;
+          var newSize = Arrays.stream(nRiskMap).map(Arrays::stream)
+              .flatMap(Function.identity())
+              .filter(Objects::nonNull)
+              .mapToInt(Integer::intValue)
+              .sum();
+          var oldSize = Arrays.stream(riskMap).map(Arrays::stream)
+              .flatMap(Function.identity())
+              .filter(Objects::nonNull)
+              .mapToInt(Integer::intValue)
+              .sum();
+          if (oldSize == newSize) {
+            process = false;
+          }
+
+          range(0, lineLength).forEach(
+              x -> range(0, linesHeight).forEach(y -> pathsMap[x][y] = nPathsMap[x][y]));
+          range(0, lineLength).forEach(
+              x -> range(0, linesHeight).forEach(y -> riskMap[x][y] = nRiskMap[x][y]));
         }
-        paths = m;
-        if (paths.size() % 100 == 0) {
-          System.out.println("coucou");
-        }
+
+        System.out.println("risk: " + riskMap[xMax][yMax]);
+      } catch (Exception e) {
+        e.printStackTrace();
       }
 
-      var bPath = paths.get(lastPoint.coord);
-
-      System.out.println("risk: " + bPath.risk);
-
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  static Point getPoint(int x, int y) {
-//    return points.stream().filter(p -> p.x == x && p.y == y).findAny().orElse(null);
-    return pointsMap.get(new Coordinate(x, y));
   }
 
 
   static List<Point> nearPoints(Point p) {
     List<Point> near = new ArrayList<>();
-    Optional.ofNullable(pointsMap.getOrDefault(new Coordinate(p.coord.x - 1, p.coord.y), null))
-        .ifPresent(near::add);
-    Optional.ofNullable(pointsMap.getOrDefault(new Coordinate(p.coord.x, p.coord.y - 1), null))
-        .ifPresent(near::add);
-    Optional.ofNullable(pointsMap.getOrDefault(new Coordinate(p.coord.x, p.coord.y + 1), null))
-        .ifPresent(near::add);
-    Optional.ofNullable(pointsMap.getOrDefault(new Coordinate(p.coord.x + 1, p.coord.y), null))
-        .ifPresent(near::add);
+    if (p.coord.x == 0) {
+      near.add(points[p.coord.x + 1][p.coord.y]);
+    } else if (p.coord.x == xMax) {
+      near.add(points[p.coord.x - 1][p.coord.y]);
+    } else {
+      near.add(points[p.coord.x - 1][p.coord.y]);
+      near.add(points[p.coord.x + 1][p.coord.y]);
+    }
+    if (p.coord.y == 0) {
+      near.add(points[p.coord.x][p.coord.y + 1]);
+    } else if (p.coord.y == yMax) {
+      near.add(points[p.coord.x][p.coord.y - 1]);
+    } else {
+      near.add(points[p.coord.x][p.coord.y - 1]);
+      near.add(points[p.coord.x][p.coord.y + 1]);
+    }
     return near;
   }
 
   record Coordinate(int x, int y) {
-    public int dist(Coordinate p) {
-      return Math.abs(p.x - x) + Math.abs(p.y - y);
-    }
+
   }
 
   static class Point {
@@ -131,18 +148,6 @@ public class Day15B {
       coord = new Coordinate(x, y);
       this.risk = risk;
       dist = 0;
-    }
-
-    public int dist(Point p) {
-      return coord.dist(p.coord);
-    }
-
-    public int getRisk() {
-      return risk;
-    }
-
-    public void setDist(int dist) {
-      this.dist = dist;
     }
 
     @Override
@@ -199,6 +204,8 @@ public class Day15B {
   static class Path {
 
     List<Point> path = new ArrayList<>();
+    List<Coordinate> coordinates = new ArrayList<>();
+    Point last;
     int risk = 0;
 
     Path() {
@@ -207,25 +214,24 @@ public class Day15B {
 
     Path(Path p, Point point) {
       path = new ArrayList<>(p.path);
+      coordinates = new ArrayList<>(p.coordinates);
       risk = p.risk;
       addPoint(point);
     }
 
-    Point getLast() {
-      return path.get(path.size() - 1);
-    }
-
     boolean contains(Point p) {
-      return path.contains(p);
+      return coordinates.contains(p.coord);
     }
 
     void addPoint(Point p) {
+      if(path.size()>20){
+        path = range(10,path.size()).mapToObj(path::get).collect(Collectors.toList());
+        coordinates = range(10,coordinates.size()).mapToObj(coordinates::get).collect(Collectors.toList());
+      }
       path.add(p);
+      coordinates.add(p.coord);
       risk += p.risk;
-    }
-
-    public int getRisk() {
-      return risk;
+      last = p;
     }
 
     @Override

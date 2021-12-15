@@ -12,7 +12,7 @@ public class Day14B {
 
   public static void main(String[] args) {
     try (var lines = Files.lines(
-        Paths.get(getSystemResource("day14.txt").getPath().substring(1)))) {
+        Paths.get(getSystemResource("day14.txt").getPath()))) {
       var in = lines.toList();
       var sequence = in.get(0);
       var insertions = range(2, in.size())

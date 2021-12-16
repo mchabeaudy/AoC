@@ -1,6 +1,7 @@
 package day16;
 
 import static java.lang.ClassLoader.getSystemResource;
+import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 import static java.util.stream.IntStream.range;
 
@@ -13,20 +14,16 @@ import java.util.stream.Collectors;
 
 public class Day16B {
 
-
   public static void main(String[] args) {
     try (var linesStream = Files.lines(
         Paths.get(getSystemResource("day16.txt").getPath().substring(1)))) {
       var line = linesStream.toList().get(0);
-      var input = range(0, line.length()).mapToObj(line::charAt).map(Day16B::hexToBin)
+      var input = range(0, line.length())
+          .mapToObj(line::charAt)
+          .map(Day16B::hexToBin)
           .collect(Collectors.joining());
 
-      var index = new AtomicInteger();
-      var packet = new Packet();
-      packet.parseSubPackets(index, input);
-
-      System.out.println("sum: " + packet.value());
-
+      System.out.println("sum: " + new Packet(new AtomicInteger(), input).value());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -34,22 +31,17 @@ public class Day16B {
 
   static class Packet {
 
-    long version;
-    long typeId;
-    long lengthTypeId;
-    List<String> bits;
-
+    int version;
+    int typeId;
+    int lengthTypeId;
+    long literal;
     List<Packet> subPackets;
 
-    public Packet() {
-    }
-
-
-    public void parseSubPackets(AtomicInteger index, String input) {
-      version = parseLong(input.substring(index.get(), index.addAndGet(3)), 2);
-      typeId = parseLong(input.substring(index.get(), index.addAndGet(3)), 2);
+    public Packet(AtomicInteger index, String input) {
+      version = parseInt(input.substring(index.get(), index.addAndGet(3)), 2);
+      typeId = parseInt(input.substring(index.get(), index.addAndGet(3)), 2);
       if (typeId == 4) {
-        bits = new ArrayList<>();
+        List<String> bits = new ArrayList<>();
         boolean process = true;
         while (process) {
           var seq = input.substring(index.get(), index.addAndGet(5));
@@ -58,23 +50,22 @@ public class Day16B {
             process = false;
           }
         }
+        literal = parseLong(String.join("", bits), 2);
       } else {
         subPackets = new ArrayList<>();
-        lengthTypeId = parseLong(input.substring(index.get(), index.addAndGet(1)));
+        lengthTypeId = parseInt(input.substring(index.get(), index.addAndGet(1)));
         if (lengthTypeId == 0) {
           long totalSubPacketsLength = parseLong(input.substring(index.get(), index.addAndGet(15)),
               2);
           int indexValue = index.get();
           while (index.get() - indexValue != totalSubPacketsLength) {
-            var packet = new Packet();
+            var packet = new Packet(index, input);
             subPackets.add(packet);
-            packet.parseSubPackets(index, input);
           }
         } else {
           long subPacketNumber = parseLong(input.substring(index.get(), index.addAndGet(11)), 2);
           while (subPackets.size() < subPacketNumber) {
-            var packet = new Packet();
-            packet.parseSubPackets(index, input);
+            var packet = new Packet(index, input);
             subPackets.add(packet);
           }
         }
@@ -82,12 +73,12 @@ public class Day16B {
     }
 
     long value() {
-      return switch ((int)typeId) {
+      return switch (typeId) {
         case 0 -> subPackets.stream().mapToLong(Packet::value).sum();
         case 1 -> product();
         case 2 -> subPackets.stream().mapToLong(Packet::value).min().orElse(0);
         case 3 -> subPackets.stream().mapToLong(Packet::value).max().orElse(0);
-        case 4 -> parseLong(String.join("", bits), 2);
+        case 4 -> literal;
         case 5 -> greaterThan();
         case 6 -> lessThan();
         case 7 -> equal();

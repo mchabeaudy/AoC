@@ -224,9 +224,9 @@ public class Day15B {
     }
 
     void addPoint(Point p) {
-      if(path.size()>20){
-        path = range(10,path.size()).mapToObj(path::get).collect(Collectors.toList());
-        coordinates = range(10,coordinates.size()).mapToObj(coordinates::get).collect(Collectors.toList());
+      if(path.size()>12){
+        path = range(6,path.size()).mapToObj(path::get).collect(Collectors.toList());
+        coordinates = range(6,coordinates.size()).mapToObj(coordinates::get).collect(Collectors.toList());
       }
       path.add(p);
       coordinates.add(p.coord);

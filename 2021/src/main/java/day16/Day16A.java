@@ -39,12 +39,10 @@ public class Day16A {
     int typeId;
     int lengthTypeId;
     List<String> bits;
-
     List<Packet> subPackets;
 
     public Packet() {
     }
-
 
     public void parseSubPackets(AtomicInteger index, String input) {
       version = parseInt(input.substring(index.get(), index.addAndGet(3)), 2);
@@ -63,9 +61,9 @@ public class Day16A {
         subPackets = new ArrayList<>();
         lengthTypeId = parseInt(input.substring(index.get(), index.addAndGet(1)));
         if (lengthTypeId == 0) {
-          int totalSubPacketsLength = parseInt(input.substring(index.get(), index.addAndGet(15)), 2);
+          int subPacketsLength = parseInt(input.substring(index.get(), index.addAndGet(15)), 2);
           int indexValue = index.get();
-          while (index.get() - indexValue != totalSubPacketsLength) {
+          while (index.get() - indexValue != subPacketsLength) {
             var packet = new Packet();
             subPackets.add(packet);
             packet.parseSubPackets(index, input);

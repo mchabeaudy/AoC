@@ -55,18 +55,15 @@ public class Day16B {
         subPackets = new ArrayList<>();
         lengthTypeId = parseInt(input.substring(index.get(), index.addAndGet(1)));
         if (lengthTypeId == 0) {
-          long totalSubPacketsLength = parseLong(input.substring(index.get(), index.addAndGet(15)),
-              2);
+          long subPacketsLength = parseLong(input.substring(index.get(), index.addAndGet(15)), 2);
           int indexValue = index.get();
-          while (index.get() - indexValue != totalSubPacketsLength) {
-            var packet = new Packet(index, input);
-            subPackets.add(packet);
+          while (index.get() - indexValue != subPacketsLength) {
+            subPackets.add(new Packet(index, input));
           }
         } else {
           long subPacketNumber = parseLong(input.substring(index.get(), index.addAndGet(11)), 2);
           while (subPackets.size() < subPacketNumber) {
-            var packet = new Packet(index, input);
-            subPackets.add(packet);
+            subPackets.add(new Packet(index, input));
           }
         }
       }

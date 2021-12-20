@@ -119,13 +119,13 @@ public class Day19A {
       var sDistMap = s.points.stream()
           .collect(toMap(identity(), p -> s.points.stream().map(p::dist2).toList()));
       Map<Point, Point> matchingPair = new HashMap<>();
-      ownDistMap.forEach((ownPoint, ownDist) -> {
+      ownDistMap.forEach((ownPoint, ownDist) ->
         sDistMap.forEach((sPoint, sDist) -> {
           if (ownDist.stream().filter(sDist::contains).count() >= 12) {
             matchingPair.put(ownPoint, sPoint);
           }
-        });
-      });
+        })
+      );
       return matchingPair;
     }
 

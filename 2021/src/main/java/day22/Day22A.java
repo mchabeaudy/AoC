@@ -37,7 +37,9 @@ public class Day22A {
 
       Map<Integer, Map<Integer, Set<Integer>>> points = new HashMap<>();
       instructions.forEach(i -> {
-
+        var l = new AtomicLong();
+        points.forEach((k, v) -> v.forEach((kk, vv) -> l.addAndGet(vv.size())));
+        System.out.println("size: " + l.get());
         if (i.on) {
           range(Math.max(-50, i.xMin), Math.min(i.xMax + 1, 51)).forEach(x -> {
             if (!points.containsKey(x)) {

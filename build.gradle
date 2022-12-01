@@ -4,6 +4,9 @@ plugins {
 
 version '1.0'
 
+sourceCompatibility = '1.17'
+targetCompatibility = '1.17'
+
 repositories {
     mavenCentral()
 }

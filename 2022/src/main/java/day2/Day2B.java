@@ -1,17 +1,21 @@
 package day2;
 
-import static java.lang.ClassLoader.getSystemResource;
-
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import utils.AbstractDay;
 
-public class Day2B {
+public class Day2B extends AbstractDay {
 
-    private static final Path PATH = Paths.get(getSystemResource("day2.txt").getFile()).toAbsolutePath();
+    public Day2B() {
+        super("day2");
+    }
 
     public static void main(String[] args) throws Exception {
-        var lines = Files.lines(PATH).toList();
+        new Day2B().solution();
+    }
+
+    @Override
+    public void solution() throws Exception {
+        var lines = Files.lines(getPath()).toList();
 
         int s = 0;
         for (String line : lines) {
@@ -77,6 +81,6 @@ public class Day2B {
             }
         }
         System.out.println(s);
-    }
 
+    }
 }

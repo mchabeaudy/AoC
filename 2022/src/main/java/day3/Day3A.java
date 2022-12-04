@@ -6,13 +6,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import utils.AbstractDay;
 
-public class Day3A {
+public class Day3A extends AbstractDay {
 
     private static final Path PATH = Paths.get(getSystemResource("day3.txt").getFile()).toAbsolutePath();
 
+    public Day3A() {
+        super("day3");
+    }
+
     public static void main(String[] args) throws Exception {
-        System.out.println(Files.lines(PATH)
+        new Day3A().solution();
+    }
+
+    @Override
+    public void solution() throws Exception {
+        System.out.println(Files.lines(getPath())
                 .mapToInt(line -> {
                     var m = line.length() / 2;
                     var s1 = line.substring(0, m);
@@ -23,13 +33,13 @@ public class Day3A {
                             .map(s -> convert(s.charAt(0)))
                             .get();
                 }).sum());
+
     }
 
-    private static int convert(char c) {
+    private int convert(char c) {
         if (Character.isUpperCase(c)) {
             return c - 38;
         }
         return c - 96;
     }
-
 }

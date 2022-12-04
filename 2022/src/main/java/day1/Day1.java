@@ -1,19 +1,23 @@
 package day1;
 
-import static java.lang.ClassLoader.getSystemResource;
-
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Stack;
+import utils.AbstractDay;
 
-public class Day1 {
+public class Day1 extends AbstractDay {
 
-    private static final Path PATH = Paths.get(getSystemResource("day1.txt").getFile()).toAbsolutePath();
+
+    public Day1() {
+        super("day1");
+    }
 
     public static void main(String[] args) throws Exception {
-        var lines = Files.lines(PATH).toList();
+        new Day1().solution();
+    }
+
+    public void solution() throws Exception {
+        var lines = Files.lines(getPath()).toList();
         var cals = new Stack<Integer>();
         int c = 0;
         for (String line : lines) {

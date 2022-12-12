@@ -26,46 +26,42 @@ public class Day11B extends AbstractDay {
 
     @Override
     public void solution() throws Exception {
-        try {
-            int nmonkey = 8;
-            var lines = Files.readAllLines(getPath());
-            var monkeys = range(0, nmonkey).mapToObj(k -> {
-                var monkey = new Monkey();
-                monkey.items = new Stack<>();
-                Arrays.stream(lines.get(1 + k * 7).replace("  Starting items: ", "")
-                        .split(", ")).map(Integer::parseInt).map(Item::new).forEach(monkey.items::add);
-                var l3 = lines.get(k * 7 + 2).split(" ");
-                if ("*".equals(l3[l3.length - 2])) {
-                    if ("old".equals(l3[l3.length - 1])) {
-                        monkey.operator = new Operation('*', true, 0);
-                    } else {
-                        monkey.operator = new Operation('*', false, Integer.parseInt(l3[l3.length - 1]));
-                    }
+        int nmonkey = 8;
+        var lines = Files.readAllLines(getPath());
+        var monkeys = range(0, nmonkey).mapToObj(k -> {
+            var monkey = new Monkey();
+            monkey.items = new Stack<>();
+            Arrays.stream(lines.get(1 + k * 7).replace("  Starting items: ", "")
+                    .split(", ")).map(Integer::parseInt).map(Item::new).forEach(monkey.items::add);
+            var l3 = lines.get(k * 7 + 2).split(" ");
+            if ("*".equals(l3[l3.length - 2])) {
+                if ("old".equals(l3[l3.length - 1])) {
+                    monkey.operator = new Operation('*', true, 0);
                 } else {
-                    if ("old".equals(l3[l3.length - 1])) {
-                        monkey.operator = new Operation('+', true, 0);
-                    } else {
-                        monkey.operator = new Operation('+', false, Integer.parseInt(l3[l3.length - 1]));
-                    }
+                    monkey.operator = new Operation('*', false, Integer.parseInt(l3[l3.length - 1]));
                 }
-                var l4 = lines.get(k * 7 + 3).split(" ");
-                var l5 = lines.get(k * 7 + 4).split(" ");
-                var l6 = lines.get(k * 7 + 5).split(" ");
-                monkey.divideTest = Integer.parseInt(l4[l4.length - 1]);
-                monkey.trueTestMonkeyId = Integer.parseInt(l5[l5.length - 1]);
-                monkey.falseTestMonkeyId = Integer.parseInt(l6[l6.length - 1]);
-                return monkey;
-            }).collect(Collectors.toList());
-            monkeys.stream().map(m -> m.items).flatMap(Collection::stream)
-                    .forEach(item ->
-                            monkeys.forEach(m -> item.addDivisor(m.divideTest)));
+            } else {
+                if ("old".equals(l3[l3.length - 1])) {
+                    monkey.operator = new Operation('+', true, 0);
+                } else {
+                    monkey.operator = new Operation('+', false, Integer.parseInt(l3[l3.length - 1]));
+                }
+            }
+            var l4 = lines.get(k * 7 + 3).split(" ");
+            var l5 = lines.get(k * 7 + 4).split(" ");
+            var l6 = lines.get(k * 7 + 5).split(" ");
+            monkey.divideTest = Integer.parseInt(l4[l4.length - 1]);
+            monkey.trueTestMonkeyId = Integer.parseInt(l5[l5.length - 1]);
+            monkey.falseTestMonkeyId = Integer.parseInt(l6[l6.length - 1]);
+            return monkey;
+        }).collect(Collectors.toList());
+        monkeys.stream().map(m -> m.items).flatMap(Collection::stream)
+                .forEach(item ->
+                        monkeys.forEach(m -> item.addDivisor(m.divideTest)));
 
-            range(0, 10000).forEach(k -> monkeys.forEach(m -> m.process(monkeys)));
-            monkeys.sort(Comparator.comparingLong(m -> m.count));
-            System.out.println(monkeys.get(nmonkey - 1).count * monkeys.get(nmonkey - 2).count);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        range(0, 10000).forEach(k -> monkeys.forEach(m -> m.process(monkeys)));
+        monkeys.sort(Comparator.comparingLong(m -> m.count));
+        System.out.println(monkeys.get(nmonkey - 1).count * monkeys.get(nmonkey - 2).count);
     }
 
     class Monkey {

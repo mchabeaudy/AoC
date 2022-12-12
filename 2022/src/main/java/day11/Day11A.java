@@ -25,8 +25,6 @@ public class Day11A extends AbstractDay {
 
     @Override
     public void solution() throws Exception {
-        try {
-
             var lines = Files.readAllLines(getPath());
             var monkeys = range(0, 8).mapToObj(k -> {
                 var monkey = new Monkey();
@@ -58,9 +56,6 @@ public class Day11A extends AbstractDay {
             range(0, 20).forEach(k -> monkeys.forEach(m -> m.process(monkeys)));
             monkeys.sort(Comparator.comparingInt(m -> m.count));
             System.out.println(monkeys.get(7).count * monkeys.get(6).count);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     class Monkey {

@@ -7,7 +7,7 @@ public abstract class AbstractDay {
 
     private String day;
 
-    public AbstractDay(String day) {
+    protected AbstractDay(String day) {
         this.day = day;
     }
 
@@ -16,5 +16,5 @@ public abstract class AbstractDay {
         return Paths.get(getSystemResource(day + ".txt").getFile()).toAbsolutePath();
     }
 
-    public abstract void solution() throws Exception;
+    abstract void solution() throws Exception;
 }

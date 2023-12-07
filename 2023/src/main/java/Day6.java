@@ -1,5 +1,3 @@
-import static java.util.stream.LongStream.range;
-
 public class Day6 extends AbstractDay {
 
     public Day6() {
@@ -9,7 +7,15 @@ public class Day6 extends AbstractDay {
 
     record Record(long time, long distance) {
         public long nbBetter() {
-            return range(1, time).filter(l -> (time - l) * l > distance).count();
+            long k = 1;
+            while ((time - k) * k <= distance) {
+                k++;
+            }
+            long k2 = time - 1;
+            while ((time - k) * k <= distance) {
+                k--;
+            }
+            return time - k - k2;
         }
     }
 
@@ -24,8 +30,13 @@ public class Day6 extends AbstractDay {
         var r3 = new Record(75, 1279);
         var r4 = new Record(94, 1216);
         System.out.println(r1.nbBetter() * r2.nbBetter() * r3.nbBetter() * r4.nbBetter());
+        long t0 = System.currentTimeMillis();
+
         var r5 = new Record(52947594, 426137412791216L);
-        System.out.println(r5.nbBetter());
+        var nb = r5.nbBetter();
+        long t1 = System.currentTimeMillis();
+        System.out.println("time :" + (t1 - t0));
+        System.out.println(nb);
     }
 
 }

@@ -2,3 +2,5 @@ rootProject.name = 'AoC'
 include '2021'
 include '2022'
 include '2023'
+include '2024'
+

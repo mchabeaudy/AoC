@@ -10,9 +10,7 @@ public class Day1 extends AbstractDay {
         super("day1");
     }
 
-    public static void main(String[] args) throws Exception {
-        new Day1().solution();
-    }
+
 
     void solution() throws Exception {
         var left = new ArrayList<Integer>();
